@@ -3,6 +3,7 @@ package main
 import (
   "fmt"
   "net/http"
+  "net"  
 )
 
 const (
@@ -10,15 +11,30 @@ const (
   version = "1.0"
 )
 
-var calls = 0
+func GetLocalIP() string {
+    addrs, err := net.InterfaceAddrs()
+    if err != nil {
+        return ""
+    }
+    for _, address := range addrs {
+        // check the address type and if it is not a loopback the display it
+        if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+            if ipnet.IP.To4() != nil {
+                return ipnet.IP.String()
+            }
+        }
+    }
+    return ""
+}
 
-func HelloWorld(w http.ResponseWriter, r *http.Request) {
-  calls++
-  fmt.Fprintf(w, "Hello, world! You have called me %d times.\nversion: %s \n", calls, version)
+func HelloWorld(w http.ResponseWriter, r *http.Request) {  
+  fmt.Fprintf(w, "Hello, world!\nversion: %s \n", version)
+  fmt.Fprintf(w, "Server IP: %s \n", GetLocalIP())
 }
 
 func init() {
-  fmt.Printf("Started server version:%s at http://localhost%v.\n", version, port)
+  fmt.Printf("Started Application version:%s \n", version)
+  fmt.Printf("server IP:%s \n", GetLocalIP())  
   http.HandleFunc("/", HelloWorld)
   http.ListenAndServe(port, nil)
 }
