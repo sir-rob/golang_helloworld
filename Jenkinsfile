@@ -1,5 +1,5 @@
-node {
-	git '…' 
+node('docker') {
+  	checkout scm
 
 	def helloworld = docker.build "alekssaul/helloworld:${env.BUILD_TAG}"
 
