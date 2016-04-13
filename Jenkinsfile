@@ -1,7 +1,7 @@
 node('docker') {
   	checkout scm
 
-	def helloworld = docker.build "alekssaul/helloworld:${env.BUILD_TAG}"
+	def helloworld = docker.build "aleks_saul/hello_world:test"
 
   	docker.withRegistry('https://quay.io', 'aleks_saul+jenkins') {
        	helloworld.push()
