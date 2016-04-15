@@ -1,9 +1,8 @@
 node('docker') {
   	checkout scm
 
-  	def helloworld = docker.build ("aleks_saul/hello_world:${env.BUILD_TAG}", ".")
-
-	docker.withRegistry('https://quay.io', 'aleks_saul+jenkins') {
+  	docker.withRegistry('https://quay.io', 'aleks_saul+jenkins') {
+  		def helloworld = docker.build ("aleks_saul/hello_world:${env.BUILD_TAG}", ".")
   		helloworld.push()
     }  	
 }
