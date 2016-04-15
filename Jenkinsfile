@@ -5,6 +5,5 @@ node('docker') {
 
 	docker.withRegistry('https://quay.io', 'aleks_saul+jenkins') {
   		helloworld.push()
-       	helloworld.push '${env.BUILD_TAG}'
     }  	
 }
