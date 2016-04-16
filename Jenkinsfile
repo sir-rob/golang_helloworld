@@ -1,13 +1,18 @@
 node('docker') {
   	checkout scm
-  	
-  	stage 'Build Docker Canary Image'  	
-  	def helloworld = docker.build ("aleks_saul/hello_world:canary", ".")
-  	sh("echo ${env.CVS_BRANCH}")
- 	
+  	  	 		
+  	def containertag = "canary"  	 
+
+  	if (env.GIT_BRANCH == 'master') {
+		def containertag = "master"  	 
+	}		
+
+	stage 'Build Docker Image'  	
+  	def helloworld = docker.build ("aleks_saul/hello_world:$containertag", ".")
 	
+	stage 'Push docker Image to Quay' 
   	docker.withRegistry('https://quay.io/v1', 'quay-registry') {
-  		stage 'Push Canary Image to Quay'  		
+  		 		
   		helloworld.push()
     }
 
