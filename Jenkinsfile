@@ -1,7 +1,8 @@
 node('docker') {
   	checkout scm
   	  	 		
-  	def containertag = "canary"  	 
+  	def containertag = "canary" 
+  	echo (${env.JOB_NAME}) 	 
 
   	if (${env.JOB_NAME} == 'origin/master') {
 		containertag = "master"  	 
