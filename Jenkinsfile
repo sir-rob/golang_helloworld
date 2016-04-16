@@ -6,6 +6,7 @@ node('docker') {
   	
   	docker.withRegistry('https://quay.io/v1', 'quay-registry') {
   		stage 'Push Image'
+  		sh ('docker login')
   		helloworld.push()
     }  	
 }
