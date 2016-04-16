@@ -2,11 +2,10 @@ node('docker') {
   	checkout scm
   	  	 		
   	def containertag = "canary" 
-  	echo (${env.JOB_NAME}) 	 
-
-  	if (${env.JOB_NAME} == 'origin/master') {
-		containertag = "master"  	 
-	}		
+  	
+	if (env.BRANCH_NAME == 'master') {
+    	containertag = "master" 
+	}
 
 	stage 'Build Docker Image'  	
   	def helloworld = docker.build ("aleks_saul/hello_world:$containertag", ".")
