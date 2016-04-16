@@ -3,7 +3,7 @@ node('docker') {
   	  	 		
   	def containertag = "canary"  	 
 
-  	if ($env.GIT_BRANCH == 'origin/master') {
+  	if (${env.JOB_NAME} == 'origin/master') {
 		containertag = "master"  	 
 	}		
 
