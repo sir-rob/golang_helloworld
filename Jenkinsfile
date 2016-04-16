@@ -4,7 +4,7 @@ node('docker') {
   	def containertag = "canary" 
   	
 	if (env.BRANCH_NAME == 'master') {
-    	containertag = "master" 
+    	containertag = "production" 
 	}
 
 	stage 'Build Docker Image'  	
