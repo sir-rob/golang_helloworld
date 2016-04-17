@@ -28,7 +28,7 @@ func GetLocalIP() string {
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request) {  
-  fmt.Fprintf(w, "Hello, world!\nversion: %s \n", version)
+  fmt.Fprintf(w, "Hello, world! version: %s ", version)
   fmt.Fprintf(w, "Server IP: %s \n", GetLocalIP())
 }
 
