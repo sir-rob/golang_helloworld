@@ -8,7 +8,7 @@ import (
 
 const (
   port = ":80"
-  version = "1.3.0"
+  version = "1.0"
 )
 
 func GetLocalIP() string {
@@ -28,8 +28,8 @@ func GetLocalIP() string {
 }
 
 func HelloWorld(w http.ResponseWriter, r *http.Request) {  
-  fmt.Fprintf(w, "Hello, world!\nversion: %s \n", version)
-  fmt.Fprintf(w, "Server IP: %s \n", GetLocalIP())
+  fmt.Fprintf(w, "Hello, world! version: %s ", version)
+  fmt.Fprintf(w, "Server IP: %s ", GetLocalIP())
 }
 
 func init() {
