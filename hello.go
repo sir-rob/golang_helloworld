@@ -8,7 +8,7 @@ import (
 
 const (
   port = ":80"
-  version = "1.3.1"
+  version = "2.0"
 )
 
 func GetLocalIP() string {
