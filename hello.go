@@ -13,8 +13,6 @@ import (
 const (
   port = ":80"
   version = "1.0"
-  ReportExternalIP = true
-  ReportGeoLocation = true
 )
 
 var (
@@ -73,20 +71,17 @@ func GetExternalIP() string {
 func HelloWorld(w http.ResponseWriter, r *http.Request) {  
   fmt.Fprintf(w, "Hello, world! version: %s ", version)
   fmt.Fprintf(w, "Local IP: %s \n", LocalIP)
-  if ReportExternalIP ==true { fmt.Fprintf(w, "External IP: %s \n", ExternalIP) }
-  if ReportGeoLocation ==true { fmt.Fprintf(w, "Location: %s \n", GeoLocation) } 
-}
-
-func init() {
-  fmt.Printf("Started Application version: %s \n", version)
-  fmt.Printf("Local IP: %s \n", LocalIP)  
-  if ReportExternalIP ==true { fmt.Printf("External IP: %s \n", ExternalIP) }
-  if ReportGeoLocation ==true { fmt.Printf("Location: %s \n", GeoLocation) } 
-  http.HandleFunc("/", HelloWorld)
-  http.ListenAndServe(port, nil)
+  if os.Getenv("HELLOWORLD_DISPLAYEXTERNALIP") !="" { fmt.Fprintf(w, "External IP: %s \n", ExternalIP) }
+  if os.Getenv("HELLOWORLD_DISPLAYGEOLOCATION") !="" { fmt.Fprintf(w, "Location: %s \n", GeoLocation) } 
 }
 
 func main() {
   GetExternalIP()
   
+  fmt.Printf("Started Application version: %s \n", version)
+  fmt.Printf("Local IP: %s \n", LocalIP)  
+  if os.Getenv("HELLOWORLD_DISPLAYEXTERNALIP") !="" { fmt.Printf("External IP: %s \n", ExternalIP) }
+  if os.Getenv("HELLOWORLD_DISPLAYGEOLOCATION") !="" { fmt.Printf("Location: %s \n", GeoLocation) } 
+  http.HandleFunc("/", HelloWorld)
+  http.ListenAndServe(port, nil)  
 }
