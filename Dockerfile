@@ -13,3 +13,4 @@ RUN mkdir /app
 WORKDIR /app
 COPY --from=builder /app .
 CMD /app/hello
+EXPOSE 80

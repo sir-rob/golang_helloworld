@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"fmt"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/oschwald/geoip2-golang"
@@ -10,10 +11,9 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strings"
-  "time"
-  "compress/gzip"
-  "path/filepath"
+	"time"
 )
 
 const (
