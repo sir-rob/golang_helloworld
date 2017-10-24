@@ -122,24 +122,24 @@ func main() {
       s.DisplayExternalIP, s.DisplayGeoLocation, s.CrashApp, s.CrashAppCount, port)
   }
 
-  fmt.Printf("Started Application version: %s \n", version)
+  log.Printf("Started Application version: %s \n", version)
   LocalIP := GetLocalIP()
-  fmt.Printf("Local IP: %s \n", LocalIP) 
+  log.Printf("Local IP: %s \n", LocalIP) 
 
   if s.DisplayExternalIP {
-    ExternalIP, err := GetExternalIP()
+    ExternalIP, err = GetExternalIP()
     if err != nil {
       log.Fatal(err.Error())
     }   
-    fmt.Printf("External IP: %s \n", ExternalIP )
+    log.Printf("External IP: %s \n", ExternalIP )
   }
 
   if s.DisplayGeoLocation {
-    GeoLocation, err := GetGeoLocation(ExternalIP)
+    GeoLocation, err = GetGeoLocation(ExternalIP)
     if err != nil {
       log.Fatal(err.Error())
     }     
-    fmt.Printf("Location: %s \n", GeoLocation) 
+    log.Printf("Location: %s \n", GeoLocation) 
   } 
  
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
