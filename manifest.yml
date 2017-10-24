@@ -1,0 +1,9 @@
+---
+applications:
+- name: helloworld
+  memory: 512M
+  instances: 1
+  env:
+    HELLOWORLD_PORT: 8080
+    HELLOWORLD_DISPLAYGEOLOCATION: false
+    HELLOWORLD_DISPLAYEXTERNALIP: true
