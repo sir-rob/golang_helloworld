@@ -1,7 +1,6 @@
 ---
 applications:
-- name: helloworld
-  memory: 512M
+- memory: 512M
   instances: 1
   buildpack: go_buildpack
   env:
