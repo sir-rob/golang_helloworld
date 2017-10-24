@@ -18,9 +18,6 @@ const (
 
 var (
   CrashAppCounter = 0
-  GeoLocation = ""
-  ExternalIP = ""
-  port = ":80"
 )
 
 type EnvVars struct {
@@ -31,7 +28,7 @@ type EnvVars struct {
     Debug bool `default:"False"`
     SimulateReady bool `default:"False"`
     WaitBeforeReady int `default:"30"`
-    Port string 
+    Port string `default:"80"`
 }
 
 type Machine struct {
@@ -118,12 +115,10 @@ func main() {
   if err != nil {
     log.Fatal(err.Error())
   }
-
-  if env.Port != "" {port = env.Port}
   
   if env.Debug {
-    fmt.Printf("DisplayExternalIP: %v\nDisplayGeoLocation: %v\nCrashApp: %v\nCrashAppCount: %v\nPort: %s\n", 
-      env.DisplayExternalIP, env.DisplayGeoLocation, env.CrashApp, env.CrashAppCount, port)
+    fmt.Printf("DisplayExternalIP: %v\nDisplayGeoLocation: %v\nCrashApp: %v\nCrashAppCount: %v\nPort: %v\n", 
+      env.DisplayExternalIP, env.DisplayGeoLocation, env.CrashApp, env.CrashAppCount, env.Port)
   }
 
   log.Printf("Started Application version: %s \n", version)
@@ -156,8 +151,8 @@ func main() {
   http.HandleFunc("/readiness", func(w http.ResponseWriter, r *http.Request) {
     readiness(w, r, env.SimulateReady, env.WaitBeforeReady)
   })
-
-  err = http.ListenAndServe(port, nil)
+  
+  err = http.ListenAndServe(":" + env.Port, nil)
   if err != nil {
     log.Fatal(err.Error())
   }
