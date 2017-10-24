@@ -2,6 +2,7 @@
 Hello World in Golang
 
 ### Environmental Variables
+```
   HELLOWORLD_DISPLAYEXTERNALIP : "False"
   HELLOWORLD_DISPLAYGEOLOCATION : "False"
   HELLOWORLD_CRASHAPP : "False"
@@ -9,3 +10,4 @@ Hello World in Golang
   HELLOWORLD_DEBUG : "False"
   HELLOWORLD_SIMULATEREADY : "False"
   HELLOWORLD_WAITBEFOREREADY : "30"
+```
