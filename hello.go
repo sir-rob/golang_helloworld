@@ -4,16 +4,22 @@ import (
 	"fmt"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/oschwald/geoip2-golang"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strings"
-	"time"
+  "time"
+  "compress/gzip"
+  "path/filepath"
 )
 
 const (
-	version = "3.1"
+	version     = "3.1"
+	GeoLiteURL  = "http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.mmdb.gz"
+	GeoLiteFile = "GeoLite2-City.mmdb"
 )
 
 var (
@@ -54,12 +60,29 @@ func GetLocalIP() string {
 }
 
 func GetGeoLocation(IPAddress string) (IP string, err error) {
-	db, err := geoip2.Open("GeoLite2-City.mmdb")
+	_, err = os.Open(GeoLiteFile)
+	if err != nil {
+		log.Print("Could not open GeoLite DB attempting to fetch over the internet...")
+	}
+
+	err = downloadFile(GeoLiteFile+".gz", GeoLiteURL)
+	if err != nil {
+		return "", err
+	}
+	log.Print("Completed fetching GeoLite DB")
+
+	err = ungzip(GeoLiteFile+".gz", ".")
+	if err != nil {
+		return "", err
+	}
+
+	db, err := geoip2.Open(GeoLiteFile)
+
 	if err != nil {
 		return "", err
 	}
 	defer db.Close()
-	// If you are using strings that may be invalid, check that ip is not nil
+
 	ip := net.ParseIP(IPAddress)
 	record, err := db.City(ip)
 	if err != nil {
@@ -108,6 +131,55 @@ func readiness(w http.ResponseWriter, r *http.Request, SimulateReady bool, WaitB
 		time.Sleep(time.Duration(WaitBeforeReady) * time.Second)
 	}
 	w.Write([]byte("OK"))
+}
+
+func downloadFile(filepath string, url string) (err error) {
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Writer the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func ungzip(source, target string) error {
+	reader, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer reader.Close()
+
+	archive, err := gzip.NewReader(reader)
+	if err != nil {
+		return err
+	}
+	defer archive.Close()
+
+	target = filepath.Join(target, archive.Name)
+	writer, err := os.Create(target)
+	if err != nil {
+		return err
+	}
+	defer writer.Close()
+
+	_, err = io.Copy(writer, archive)
+	return err
 }
 
 func main() {
