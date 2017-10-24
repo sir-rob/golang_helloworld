@@ -4,7 +4,6 @@ import (
   "fmt"
   "net/http"
   "net"
-  "os" 
   "log"
   "io/ioutil"
   "strings"
@@ -24,7 +23,7 @@ var (
   port = ":80"
 )
 
-type Specification struct {
+type EnvVars struct {
     DisplayExternalIP bool `default:"False"`
     DisplayGeoLocation bool `default:"False"`
     CrashApp bool `default:"False"`
@@ -33,6 +32,12 @@ type Specification struct {
     SimulateReady bool `default:"False"`
     WaitBeforeReady int `default:"30"`
     Port string 
+}
+
+type Machine struct {
+  ExternalIP string
+  LocalIP string
+  GeoLocation string
 }
 
 func GetLocalIP() string {
@@ -54,7 +59,6 @@ func GetLocalIP() string {
 func GetGeoLocation(IPAddress string) (IP string, err error) {
     db, err := geoip2.Open("GeoLite2-City.mmdb")
     if err != nil {
-      os.Stderr.WriteString(err.Error())
       return "", err
     }
     defer db.Close()
@@ -62,8 +66,7 @@ func GetGeoLocation(IPAddress string) (IP string, err error) {
     ip := net.ParseIP(IPAddress)
     record, err := db.City(ip)
     if err != nil {
-      os.Stderr.WriteString(err.Error())
-      return "", nil
+      return "", err
     }
     LocationString := record.Subdivisions[0].Names["en"] + ", " + record.Country.Names["en"]
 
@@ -75,20 +78,19 @@ func GetExternalIP() (ExternalIP string, err error){
   resp, err := http.Get("http://myexternalip.com/raw")
 
   if err != nil {
-    os.Stderr.WriteString(err.Error())
     return "", err
   }
 
   defer resp.Body.Close()
   body, err := ioutil.ReadAll(resp.Body)
-  return strings.TrimSpace(string(body[:])), nil
+  return strings.TrimSpace(string(body[:])), err
 }
 
-func HelloWorld(w http.ResponseWriter, r *http.Request, DisplayExternalIP bool, DisplayGeoLocation bool, ExternalIP string, GeoLocation string, LocalIP string) {  
+func HelloWorld(w http.ResponseWriter, r *http.Request, env EnvVars, machine Machine) {  
   fmt.Fprintf(w, "Hello, world! version: %s ", version)
-  fmt.Fprintf(w, "Local IP: %s \n", LocalIP)
-  if DisplayExternalIP { fmt.Fprintf(w, "External IP: %s \n", ExternalIP)}
-  if DisplayGeoLocation { fmt.Fprintf(w, "Location: %s \n", GeoLocation) } 
+  fmt.Fprintf(w, "Local IP: %s \n", machine.LocalIP)
+  if env.DisplayExternalIP { fmt.Fprintf(w, "External IP: %s \n", machine.ExternalIP)}
+  if env.DisplayGeoLocation { fmt.Fprintf(w, "Location: %s \n", machine.GeoLocation) } 
   CrashAppCounter = CrashAppCounter + 1
 }
 
@@ -109,49 +111,50 @@ func readiness(w http.ResponseWriter, r *http.Request, SimulateReady bool, WaitB
 
 func main() {
   
-  var s Specification
-  err := envconfig.Process("HelloWorld", &s)
+  var env EnvVars
+  var machine Machine
+
+  err := envconfig.Process("HelloWorld", &env)
   if err != nil {
     log.Fatal(err.Error())
   }
 
-  if s.Port != "" {port = s.Port}
+  if env.Port != "" {port = env.Port}
   
-  if s.Debug {
+  if env.Debug {
     fmt.Printf("DisplayExternalIP: %v\nDisplayGeoLocation: %v\nCrashApp: %v\nCrashAppCount: %v\nPort: %s\n", 
-      s.DisplayExternalIP, s.DisplayGeoLocation, s.CrashApp, s.CrashAppCount, port)
+      env.DisplayExternalIP, env.DisplayGeoLocation, env.CrashApp, env.CrashAppCount, port)
   }
 
   log.Printf("Started Application version: %s \n", version)
-  LocalIP := GetLocalIP()
-  log.Printf("Local IP: %s \n", LocalIP) 
+  machine.LocalIP = GetLocalIP()
+  log.Printf("Local IP: %s \n", machine.LocalIP) 
 
-  if s.DisplayExternalIP {
-    ExternalIP, err = GetExternalIP()
+  if env.DisplayExternalIP {
+    machine.ExternalIP, err = GetExternalIP()
     if err != nil {
       log.Fatal(err.Error())
     }   
-    log.Printf("External IP: %s \n", ExternalIP )
+    log.Printf("External IP: %s \n", machine.ExternalIP )
   }
-
-  if s.DisplayGeoLocation {
-    GeoLocation, err = GetGeoLocation(ExternalIP)
+  if env.DisplayGeoLocation {
+    machine.GeoLocation, err = GetGeoLocation(machine.ExternalIP)
     if err != nil {
       log.Fatal(err.Error())
     }     
-    log.Printf("Location: %s \n", GeoLocation) 
+    log.Printf("Location: %s \n", machine.GeoLocation) 
   } 
  
   http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-    HelloWorld(w, r, s.DisplayExternalIP, s.DisplayGeoLocation, ExternalIP, GeoLocation, LocalIP)
+    HelloWorld(w, r, env, machine)
   })
   
   http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-    healthz(w, r, s.CrashApp, s.CrashAppCount)
+    healthz(w, r, env.CrashApp, env.CrashAppCount)
   })
 
   http.HandleFunc("/readiness", func(w http.ResponseWriter, r *http.Request) {
-    readiness(w, r, s.SimulateReady, s.WaitBeforeReady)
+    readiness(w, r, env.SimulateReady, env.WaitBeforeReady)
   })
 
   err = http.ListenAndServe(port, nil)
