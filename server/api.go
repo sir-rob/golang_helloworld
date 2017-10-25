@@ -1,19 +1,25 @@
 package main
 
 import (
+	"os"
 	"log"
 	"fmt"
 	"net/http"
 	"time"
-    "encoding/json"
+	"encoding/json"
 )
 
 
-func healthz(w http.ResponseWriter, r *http.Request, CrashApp bool, CrashAppCount int) {
-	if CrashApp && CrashAppCounter >= CrashAppCount {
-		// do nothing
-	} else {
+func healthz(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("OK"))
+}
+
+func KillServer(w http.ResponseWriter, r *http.Request, CrashAppCount int) {
+	if CrashAppCounter == CrashAppCount - 1 {
+		os.Exit(1)
+	} else {
+		CrashAppCounter = CrashAppCounter + 1
+		fmt.Fprintf(w, "App will crash in %v more HTTP GETs to this endpoint\n", CrashAppCount - CrashAppCounter )
 	}
 }
 
@@ -31,8 +37,6 @@ func MainApi(w http.ResponseWriter, r *http.Request, env EnvVars, machine Machin
     }
 	
 	fmt.Fprintf(w, "%s\n", b)
-
-	CrashAppCounter = CrashAppCounter + 1
 }
 
 

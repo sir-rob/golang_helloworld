@@ -21,7 +21,6 @@ var (
 type EnvVars struct {
 	DisplayExternalIP  bool   `default:"False"`
 	DisplayGeoLocation bool   `default:"False"`
-	CrashApp           bool   `default:"False"`
 	CrashAppCount      int    `default:"5"`
 	SimulateReady      bool   `default:"False"`
 	WaitBeforeReady    int    `default:"30"`
@@ -47,13 +46,21 @@ func main() {
 	var env EnvVars
 	var machine Machine
 
+	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		healthz(w, r)
+	})
+
 	err := envconfig.Process("HelloWorld", &env)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	log.Printf("- Running with Flags - \nDISPLAYEXTERNALIP: %v\nDISPLAYGEOLOCATION: %v\nCrashApp: %v\nCrashAppCount: %v\nPort: %v\n",
-		env.DisplayExternalIP, env.DisplayGeoLocation, env.CrashApp, env.CrashAppCount, env.Port)
+	http.HandleFunc("/kill", func(w http.ResponseWriter, r *http.Request) {
+		KillServer(w, r,  env.CrashAppCount)
+	})
+
+	log.Printf("- Running with Flags - \nDISPLAYEXTERNALIP: %v\nDISPLAYGEOLOCATION: %v\nCrashAppCount: %v\nPort: %v\n",
+		env.DisplayExternalIP, env.DisplayGeoLocation, env.CrashAppCount, env.Port)
 	
 	machine.version = version
 	log.Printf("Started Application version: %s \n", machine.version)
@@ -87,17 +94,10 @@ func main() {
 		MainApi(w, r, env, machine)
 	})
 
-	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		healthz(w, r, env.CrashApp, env.CrashAppCount)
-	})
-
 	http.HandleFunc("/readiness", func(w http.ResponseWriter, r *http.Request) {
 		readiness(w, r, env.SimulateReady, env.WaitBeforeReady)
 	})
 
-	err = http.ListenAndServe(":"+env.Port, nil)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
+	log.Fatal(http.ListenAndServe(":"+env.Port, nil))
 
 }
