@@ -1,14 +1,22 @@
+//go:generate statik -src=./public
+
 package main
 
 import (
 	"fmt"
-	"github.com/alekssaul/golang_helloworld/pkg/location"
 	"github.com/kelseyhightower/envconfig"
 	"log"
 	"net"
 	"net/http"
 	"time"
+	"github.com/rakyll/statik/fs"
+	_ "github.com/alekssaul/golang_helloworld/statik"
+	"github.com/alekssaul/golang_helloworld/pkg/location"
 )
+
+import (
+
+  )
 
 const (
 	version     = "3.1"
@@ -112,6 +120,13 @@ func main() {
 		log.Printf("Location: %s \n", machine.GeoLocation)
 	}
 
+	statikFS, err := fs.New()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	http.Handle("/", http.StripPrefix("/", http.FileServer(statikFS)))
+	
 	http.HandleFunc("/debug", func(w http.ResponseWriter, r *http.Request) {
 		HelloWorld(w, r, env, machine)
 	})
