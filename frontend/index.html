@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=&callback=initMap"></script>
+  </head>
+  <title>Find my App</title>
+  <body>
+    <h1>Where am I running?</h1>
+    <div id="map"></div>
+    <br />
+    <br />
+    <p id="machineinfo"></p>
+    <script>
+      var myLatitude = "";
+      var myLongitude = "";
+      var myCountry = "";
+      var myState = "";
+      var myExternalIP = "";
+      var myInternalIP = "";
+
+      jQuery.getJSON('/api', function(data) {
+        console.log(data);
+        myLatitude = data.GeoLocation.Latitude;
+        myLongitude = data.GeoLocation.Longitude;
+        myCountry = data.GeoLocation.Country;
+        myState = data.GeoLocation.State;
+        myInternalIP = data.LocalIP;
+        myExternalIP = data.ExternalIP;
+        
+        document.getElementById("machineinfo").innerHTML = myState + ", " + myCountry +
+         "</br>External IP: " + myExternalIP + 
+         "</br>Internal IP: " + myInternalIP ;
+      })
+      
+      function initMap() {
+        var uluru = {lat: myLatitude, lng: myLongitude};
+        var map = new google.maps.Map(document.getElementById('map'), {
+          zoom: 8,
+          center: uluru
+        });
+        var marker = new google.maps.Marker({
+          position: uluru,
+          map: map
+        });
+      }
+    </script>
+  </body>
+</html>
