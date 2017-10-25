@@ -3,7 +3,9 @@ applications:
 - memory: 512M
   instances: 1
   buildpack: go_buildpack
+  command: server
   env:
     HELLOWORLD_PORT: 8080
     HELLOWORLD_DISPLAYGEOLOCATION: true
     HELLOWORLD_DISPLAYEXTERNALIP: true
+    GO_INSTALL_PACKAGE_SPEC: github.com/alekssaul/golang_helloworld/server

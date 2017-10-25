@@ -45,8 +45,8 @@ func GetGeoLocation(IPAddress string) (Location local, err error) {
 		return emptylocal, err
 	}
 
-	Location.City = record.Subdivisions[0].Names["en"]
-	Location.State = record.Country.Names["en"]
+	Location.State = record.Subdivisions[0].Names["en"]
+	Location.Country = record.Country.Names["en"]
 	Location.Latitude = record.Location.Latitude
 	Location.Longitude = record.Location.Longitude
 	return Location, nil

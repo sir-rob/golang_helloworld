@@ -36,8 +36,8 @@ type Machine struct {
 }
 
 type local struct{
-	City string
 	State string
+	Country string
 	Latitude float64
 	Longitude float64
 }
@@ -73,7 +73,7 @@ func main() {
 		if err != nil {
 			log.Fatal(err.Error())
 		}
-		log.Printf("Location: %s , %s \n", machine.GeoLocation.City, machine.GeoLocation.State)
+		log.Printf("Location: %s , %s \n", machine.GeoLocation.State, machine.GeoLocation.Country)
 	}
 
 	statikFS, err := fs.New()
