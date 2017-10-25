@@ -1,0 +1,15 @@
+#map {
+  height: 400px;
+  width: 100%;
+ }
+
+h1 {
+    color: black;
+    text-align: center;    
+}
+
+p  {
+    color: black;
+    font-family: courier;
+    font-size: 160%;
+}
